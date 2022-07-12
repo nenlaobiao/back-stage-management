@@ -1,7 +1,7 @@
 <template>
-  <div >
-    <!-- 一级路由占位符 -->
-    <router-view></router-view>
+  <div>
+    <Crumb :title="['商品管理', '分类参数']"></Crumb>
+    <div class="container">分类参数</div>
   </div>
 </template>
 
@@ -20,5 +20,10 @@ export default {
 </script>
 
 <style scoped lang='less'>
-
+.container {
+  margin: 20px 0;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+}
 </style>
