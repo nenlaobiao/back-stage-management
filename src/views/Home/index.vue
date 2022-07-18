@@ -43,7 +43,6 @@
           router
           :collapse="isCollapse"
           class="el-menu-vertical-demo"
-          default-active="1-4-1"
           background-color="#64aedf"
           text-color="#222"
           unique-opened
@@ -66,7 +65,7 @@
             <el-menu-item index="/role"
               >角色列表<i class="el-icon-arrow-right"></i
             ></el-menu-item>
-            <el-menu-item index="/permission"
+            <el-menu-item index="/rootlist"
               >权限列表<i class="el-icon-arrow-right"></i
             ></el-menu-item>
           </el-submenu>
@@ -104,6 +103,33 @@
             ></el-menu-item>
           </el-submenu>
         </el-menu>
+        <!-- <el-radio-group v-model="isCollapse" style="margin-bottom: 20px">
+          <div @click="isCollapse = !isCollapse" class="btn">
+            <i :class="isCollapse ? 'el-icon-s-unfold' : 'el-icon-s-fold'"></i>
+          </div>
+        </el-radio-group>
+        <el-menu
+          router
+          :collapse="isCollapse"
+          class="el-menu-vertical-demo"
+          background-color="#64aedf"
+          text-color="#222"
+          unique-opened
+          active-text-color="#222"
+        >
+          <el-submenu :index="obj.id+''" v-for="obj in routerList" :key="obj.id">
+            <template #title>
+              <i class="el-icon-user" style="color: #222"></i>
+              <span slot="title">{{ obj.authName }}</span>
+            </template>
+            <el-menu-item
+              v-for="item in obj.children"
+              :key="item.id"
+              :index="'/' + obj.path+'/' + item.path"
+              >{{ item.authName }}<i class="el-icon-arrow-right"></i
+            ></el-menu-item>
+          </el-submenu>
+        </el-menu> -->
       </el-aside>
       <el-main>
         <router-view></router-view>
@@ -116,13 +142,111 @@
 import { mapGetters } from 'vuex'
 export default {
   created () {
-    if (!this.userData && !this.userData.token) {
-      this.$router.push('/login')
-    }
+    // if (!this.userData && !this.userData.token) {
+    //   this.$router.push('/login')
+    // }
   },
   data () {
     return {
-      isCollapse: true
+      isCollapse: true,
+      routerList: [
+        {
+          id: 125,
+          authName: '用户管理',
+          path: 'users',
+          children: [
+            {
+              id: 110,
+              authName: '用户列表',
+              path: 'users',
+              children: [],
+              order: null
+            }
+          ],
+          order: 1
+        },
+        {
+          id: 103,
+          authName: '权限管理',
+          path: 'rights',
+          children: [
+            {
+              id: 111,
+              authName: '角色列表',
+              path: 'roles',
+              children: [],
+              order: null
+            },
+            {
+              id: 112,
+              authName: '权限列表',
+              path: 'rights',
+              children: [],
+              order: null
+            }
+          ],
+          order: 2
+        },
+        {
+          id: 101,
+          authName: '商品管理',
+          path: 'goods',
+          children: [
+            {
+              id: 104,
+              authName: '商品列表',
+              path: 'goods',
+              children: [],
+              order: 1
+            },
+            {
+              id: 115,
+              authName: '分类参数',
+              path: 'params',
+              children: [],
+              order: 2
+            },
+            {
+              id: 121,
+              authName: '商品分类',
+              path: 'categories',
+              children: [],
+              order: 3
+            }
+          ],
+          order: 3
+        },
+        {
+          id: 102,
+          authName: '订单管理',
+          path: 'orders',
+          children: [
+            {
+              id: 107,
+              authName: '订单列表',
+              path: 'orders',
+              children: [],
+              order: null
+            }
+          ],
+          order: 4
+        },
+        {
+          id: 145,
+          authName: '数据统计',
+          path: 'reports',
+          children: [
+            {
+              id: 146,
+              authName: '数据报表',
+              path: 'reports',
+              children: [],
+              order: null
+            }
+          ],
+          order: 5
+        }
+      ]
     }
   },
   methods: {
@@ -194,7 +318,7 @@ export default {
     border: 0;
     display: block;
     text-align: center;
-    margin: 0 auto;
+    // margin: 0 auto;
     i {
       font-size: 20px;
       line-height: 56px;
@@ -210,7 +334,7 @@ export default {
 }
 :deep(.el-menu i) {
   color: #222 !important;
-  font-size: 18px !important;
+  font-size: 20px !important;
 }
 :deep(.el-menu .el-icon-arrow-right) {
   font-size: 16px !important;
@@ -218,7 +342,7 @@ export default {
 }
 :deep(.el-icon-arrow-right) {
   color: #222 !important;
-  transform: translateY(-2px);
+  // transform: translateY(-2px);
 }
 :deep(.el-dropdown-menu__item.is-disabled) {
   color: #222 !important;

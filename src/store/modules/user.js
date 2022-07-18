@@ -1,5 +1,5 @@
 const state = {
-  userData: ''
+  userData: {}
 }
 const mutations = {
   setUserData (state, data) {

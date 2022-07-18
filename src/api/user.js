@@ -54,15 +54,7 @@ export const addUserAPI = ({ username, password, email, mobile }) => {
     }
   })
 }
-/**
- *  获取角色
- * @returns
- */
-export const getRolesAPI = () => {
-  return request({
-    url: 'roles'
-  })
-}
+
 /**
  * 修改角色状态
  * @param {*} param0
@@ -72,5 +64,19 @@ export const setStateAPI = ({ id, type }) => {
   return request({
     method: 'PUT',
     url: `users/${id}/state/${type}`
+  })
+}
+/**
+ *  修改用户邮件、电话信息
+ * @param {*} param0
+ * @returns
+ */
+export const setUserDataAPI = ({ id, email, mobile }) => {
+  return request({
+    method: 'PUT',
+    url: `users/${id}`,
+    data: {
+      email, mobile
+    }
   })
 }

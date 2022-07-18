@@ -10,11 +10,12 @@ const routes = [
     component: () => import('@/views/Home'),
     redirect: '/welcome',
     children: [
-      { path: 'permission', component: () => import('@/views/Root/PermissionList.vue') },
+      { path: 'rootList', component: () => import('@/views/Root/RootList.vue') },
       { path: 'role', component: () => import('@/views/Root/RoleList.vue') },
       { path: 'userlist', component: () => import('@/views/User/UserList.vue') },
       { path: 'goodslist', component: () => import('@/views/Goods/GoodsList.vue') },
       { path: 'goodsclass', component: () => import('@/views/Goods/GoodClass.vue') },
+      { path: 'addgoods', component: () => import('@/views/Goods/AddGoods.vue') },
       { path: 'parameters', component: () => import('@/views/Goods/Parameters.vue') },
       { path: 'order', component: () => import('@/views/Order/Order.vue') },
       { path: 'report', component: () => import('@/views/Report/Report.vue') },

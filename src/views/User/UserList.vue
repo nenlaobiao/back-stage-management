@@ -3,26 +3,26 @@
     <Crumb :title="['用户管理', '用户列表']"></Crumb>
     <div class="container">
       <div class="title">
-        <el-input placeholder="请输入内容" v-model="dataObj.query">
+        <el-input placeholder="请输入内容" v-model.trim="dataObj.query">
           <el-button
             slot="append"
             icon="el-icon-search"
-            @click="getUserList()"
+            @click="searchFn"
           ></el-button>
         </el-input>
         <el-button type="primary" @click="addDialog = true">添加用户</el-button>
       </div>
       <div class="body">
-        <el-table :data="userList.users" border>
+        <el-table :data="userList.users" border stripe>
           <el-table-column type="index" label="#" />
           <el-table-column prop="username" label="姓名" min-width="90px" />
           <el-table-column prop="mobile" label="电话" min-width="115px" />
           <el-table-column prop="role_name" label="角色" min-width="100px" />
           <el-table-column label="状态" min-width="65px">
-            <template v-slot="scope">
+            <template v-slot="abc">
               <el-switch
-                v-model="scope.row.mg_state"
-                @change="setState(scope.row)"
+                v-model="abc.row.mg_state"
+                @change="setState(abc.row)"
               />
             </template>
           </el-table-column>
@@ -51,8 +51,10 @@
         </el-table>
         <el-pagination
           background
-          layout="prev, pager, next"
+          layout="total,prev ,pager, next ,sizes"
+          :page-sizes="[3, 5, 8, 10]"
           :total="userList.total"
+          @size-change="changeSize"
           :page-size="dataObj.pagesize"
           @current-change="changePage"
         >
@@ -112,22 +114,25 @@
           </span>
         </el-dialog>
         <el-dialog title="编辑用户" :visible.sync="setUserDialog" width="400px">
-          <el-form label-width="80px" :model="setUserData" :rules="rules[1]">
+          <el-form
+            v-if="setUserDialog"
+            label-width="80px"
+            :model="setUserDataFrom"
+            :rules="rules[1]"
+          >
             <el-form-item label="用户名称">
-              <el-input disabled v-model="setUserData.username"></el-input>
+              <el-input disabled v-model="setUserDataFrom.username"></el-input>
             </el-form-item>
             <el-form-item label="邮箱" prop="email">
-              <el-input v-model="setUserData.email"></el-input>
+              <el-input v-model="setUserDataFrom.email"></el-input>
             </el-form-item>
             <el-form-item label="手机号" prop="mobile">
-              <el-input v-model="setUserData.mobile"></el-input>
+              <el-input v-model="setUserDataFrom.mobile"></el-input>
             </el-form-item>
           </el-form>
           <span slot="footer" class="dialog-footer">
             <el-button @click="setUserDialog = !setUserDialog">取 消</el-button>
-            <el-button type="primary" @click="setUserDialog = !setUserDialog"
-              >确 定</el-button
-            >
+            <el-button type="primary" @click="setUserDataFn">确 定</el-button>
           </span>
         </el-dialog>
       </div>
@@ -137,7 +142,8 @@
 
 <script>
 import { validateEmail, validateMobile } from '@/utils/validat'
-import { getUserList, delUserAPI, addUserAPI, getRolesAPI, setStateAPI } from '@/api/user'
+import { getUserList, delUserAPI, addUserAPI, setStateAPI, setUserDataAPI } from '@/api/user'
+import { getRolesAPI } from '@/api/root'
 export default {
   created () {
     this.getUserList()
@@ -148,7 +154,12 @@ export default {
       addUserDataShow: 'right',
       addUserData: {
       },
-      setUserData: {},
+      setUserDataFrom: {
+        id: 0,
+        email: '',
+        mobile: '',
+        username: ''
+      },
       setRolesData: {},
       rules: [
         {
@@ -194,24 +205,21 @@ export default {
     }
   },
   methods: {
+    searchFn () {
+      console.log(1)
+      if (this.dataObj.query !== '') {
+        this.getUserList()
+      } else {
+        this.$message('请输入搜索内容')
+      }
+    },
     async setState (value) {
       try {
-        const res = await setStateAPI({
+        await setStateAPI({
           id: value.id,
           type: value.mg_state
         })
-        console.log(res)
-        if (res.data.meta.status === 200) {
-          this.$message({
-            type: 'success',
-            message: res.data.meta.msg
-          })
-        } else {
-          this.$message({
-            type: 'error',
-            message: res.data.meta.msg
-          })
-        }
+        // console.log(res)
       } catch (error) {
         console.log(error)
         this.$message({
@@ -233,32 +241,22 @@ export default {
     },
     async submitAdd () {
       try {
-        const bool = await this.$refs.addUserForm.validate()
-        if (bool) {
-          const res = await addUserAPI(this.addUserData)
-          console.log(res)
-
-          if (res.data.meta.status === 201) {
-            this.$message({
-              type: 'success',
-              message: '添加成功!'
-            })
-            this.addUserData = {}
-            this.getUserList()
-            this.addDialog = false
-          } else {
-            this.$message({
-              type: 'error',
-              message: res.data.meta.msg
-            })
-          }
-        }
+        await this.$refs.addUserForm.validate()
+        const res = await addUserAPI(this.addUserData)
+        console.log(res)
+        this.addUserData = {}
+        this.getUserList()
+        this.addDialog = false
       } catch (error) {
         console.log(error)
       }
     },
     setBtn (data) {
-      this.setUserData = data
+      console.log(data)
+      this.setUserDataFrom.id = data.id
+      this.setUserDataFrom.email = data.email
+      this.setUserDataFrom.mobile = data.mobile
+      this.setUserDataFrom.username = data.username
       this.setUserDialog = true
     },
     delBtn (data) {
@@ -269,25 +267,9 @@ export default {
         type: 'warning'
       }).then(async () => {
         try {
-          const res = await delUserAPI(data.id)
-          // console.log(res)
-          if (res.data.meta.status === 200) {
-            this.$message({
-              type: 'success',
-              message: '删除成功!'
-            })
-          } else {
-            this.$message({
-              type: 'error',
-              message: res.data.meta.msg
-            })
-          }
+          await delUserAPI(data.id)
         } catch (error) {
           console.log(error)
-          this.$message({
-            type: 'error',
-            message: '删除失败'
-          })
         }
         this.getUserList()
       }).catch(() => {
@@ -301,23 +283,34 @@ export default {
       try {
         const res = await getUserList(this.dataObj)
         console.log(res)
-        if (res.data.meta.status === 200) {
-          this.userList = res.data.data
-        }
+        this.userList = res
       } catch (error) {
         console.log(error)
       }
     },
     async setUser (data) {
       const res = await getRolesAPI()
-      console.log(res)
-      this.rolesList = res.data.data
+      this.rolesList = res
       console.log(data)
       this.setRolesData = data
       this.setUpDialog = true
     },
+    async setUserDataFn () {
+      try {
+        const res = await setUserDataAPI(this.setUserDataFrom)
+        console.log(res)
+        this.getUserList()
+        this.setUserDialog = false
+      } catch (error) {
+        this.$message.error(error.message)
+      }
+    },
     changePage (page) {
       this.dataObj.pagenum = page
+      this.getUserList()
+    },
+    changeSize (size) {
+      this.dataObj.pagesize = size
       this.getUserList()
     }
   },

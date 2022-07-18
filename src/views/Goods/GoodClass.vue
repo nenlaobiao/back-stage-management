@@ -7,7 +7,8 @@
 
 <script>
 export default {
-  created () { },
+  created () {
+  },
   data () {
     return {}
   },

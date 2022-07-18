@@ -56,14 +56,9 @@ export default {
         console.log('校验成功')
         try {
           const res = await loginAPI(this.loginForm)
-          console.log(res)
-          if (res.data.meta.status === 200) {
-            this.$store.commit('user/setUserData', res.data.data)
-            this.$message.success(res.data.meta.msg)
-            this.$router.push('/welcome')
-          } else {
-            this.$message.error(res.data.meta.msg)
-          }
+          // console.log(res)
+          this.$store.commit('user/setUserData', res)
+          this.$router.push('/welcome')
         } catch (error) {
           this.$message.error('登录失败、请再次尝试')
           console.log(error)
