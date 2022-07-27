@@ -78,10 +78,10 @@
               >商品列表<i class="el-icon-arrow-right"></i
             ></el-menu-item>
             <el-menu-item index="/goodsclass"
-              >分类参数<i class="el-icon-arrow-right"></i
+              >商品分类<i class="el-icon-arrow-right"></i
             ></el-menu-item>
             <el-menu-item index="/parameters"
-              >商品分类<i class="el-icon-arrow-right"></i
+              >分类参数<i class="el-icon-arrow-right"></i
             ></el-menu-item>
           </el-submenu>
           <el-submenu index="4">
@@ -272,6 +272,7 @@ export default {
 }
 .container {
   height: 100vh;
+  overflow: auto;
   background-color: #eaedf1;
 
   .el-header {

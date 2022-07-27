@@ -6,6 +6,7 @@ const request = axios.create({
   baseURL: 'http://liufusong.top:8899/api/private/v1/',
   timeout: 5000
 })
+// http://liufusong.top:8899/api/private/v1/tmp_uploads\\40e39fc8922d2d48f0a10d8845c95f71.jpg
 request.interceptors.request.use(function (config) {
   // 在发送请求之前做些什么
   if (store.state.user.userData && store.state.user.userData.token) {

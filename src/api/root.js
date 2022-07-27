@@ -3,8 +3,7 @@ import request from '@/utils/request'
  *  获取所有权限列表
  * @returns
  */
-export const getRootListAPI = () => {
-  const type = 'tree'
+export const getRootListAPI = (type) => {
   return request({
     url: `rights/${type}`
   })

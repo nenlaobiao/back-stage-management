@@ -230,7 +230,7 @@ export default {
     async rootfn (row) {
       this.jb = []
       try {
-        const res = await getRootListAPI()
+        const res = await getRootListAPI('tree')
         // console.log(res)
         this.roleTree = res
         this.roleId = row.id
@@ -334,7 +334,7 @@ export default {
 :deep(.box) {
   display: flex !important;
 }
-/deep/ .el-table__expanded-cell {
+:deep(.el-table__expanded-cell) {
   padding: 6px 0 !important;
 }
 :deep(.el-divider--horizontal) {

@@ -1,66 +1,124 @@
 <template>
   <div>
     <div>
-      <Crumb :title="['商品管理', '添加商品']"></Crumb>
       <div class="container">
         <el-alert
-          title="添加商品"
+          :title="id === 'add' ? '添加商品' : '修改商品'"
           type="info"
           show-icon
           :closable="false"
           center
         />
-        <el-steps :active="active" finish-status="success" align-center>
-          <el-step title="基本信息" />
-          <el-step title="商品参数" />
-          <el-step title="商品属性" />
-          <el-step title="商品属性" />
-          <el-step title="商品内容" />
+        <el-steps :active="active" align-center>
+          <el-step title="基本信息" :status="status" />
+          <el-step title="商品参数" :status="active >= 2 ? 'success' : ''" />
+          <el-step title="商品属性" :status="active >= 3 ? 'success' : ''" />
+          <el-step title="商品属性" :status="active >= 4 ? 'success' : ''" />
+          <el-step title="商品内容" :status="active >= 5 ? 'success' : ''" />
           <el-step title="完成" />
         </el-steps>
         <div class="body">
-          <div class="left">
-            <el-tabs tabPosition="left" @tab-click="tabFn">
-              <el-tab-pane label="基本信息">
-                <el-form
-                  ref="form"
-                  :model="goodsData"
-                  label-width="80px"
-                  :rules="rules"
-                >
-                  <el-form-item label="商品名称" prop='goods_name'>
-                    <el-input v-model="goodsData.goods_name"></el-input>
-                  </el-form-item>
-                  <el-form-item label="商品价格" prop='goods_price'>
-                    <el-input v-model.number="goodsData.goods_price"></el-input>
-                  </el-form-item>
-                  <el-form-item label="商品重量" prop='goods_weight'>
-                    <el-input
-                      v-model.number="goodsData.goods_weight"
-                    ></el-input>
-                  </el-form-item>
-                  <el-form-item label="商品数量" prop='goods_number'>
-                    <el-input
-                      v-model.number="goodsData.goods_number"
-                    ></el-input>
-                  </el-form-item>
-                  <el-form-item label="商品分类" prop='goods_cat'>
-                    <el-cascader
-                      v-model="goodsData.goods_cat"
-                      :options="options"
-                      @change="handleChange"
-                    ></el-cascader>
-                  </el-form-item>
-                </el-form>
-              </el-tab-pane>
-              <el-tab-pane label="商品参数">商品参数</el-tab-pane>
-              <el-tab-pane label="商品属性">商品属性</el-tab-pane>
-              <el-tab-pane label="商品图片">商品图片</el-tab-pane>
-              <el-tab-pane label="商品内容">商品内容</el-tab-pane>
-              <el-tab-pane label="完成">完成</el-tab-pane>
-            </el-tabs>
-          </div>
-          <div class="right"></div>
+          <el-tabs tabPosition="left" @tab-click="tabFn">
+            <el-tab-pane label="基本信息">
+              <el-form
+                ref="form"
+                :model="goodsData"
+                label-width="80px"
+                :rules="rules"
+              >
+                <el-form-item label="商品名称" prop="goods_name">
+                  <el-input v-model="goodsData.goods_name" />
+                </el-form-item>
+                <el-form-item label="商品价格" prop="goods_price">
+                  <el-input
+                    v-model.number="goodsData.goods_price"
+                    min="0"
+                    type="number"
+                  />
+                </el-form-item>
+                <el-form-item label="商品重量" prop="goods_weight">
+                  <el-input
+                    v-model.number="goodsData.goods_weight"
+                    min="0"
+                    type="number"
+                  />
+                </el-form-item>
+                <el-form-item label="商品数量" prop="goods_number">
+                  <el-input
+                    v-model.number="goodsData.goods_number"
+                    type="number"
+                  />
+                </el-form-item>
+                <el-form-item label="商品分类" prop="goods_cat">
+                  <el-cascader
+                    v-model="goodsData.goods_cat"
+                    :options="catList"
+                    filterable
+                    :props="{
+                      label: 'cat_name',
+                      value: 'cat_id',
+                    }"
+                  ></el-cascader>
+                </el-form-item>
+              </el-form>
+            </el-tab-pane>
+            <el-tab-pane label="商品参数">
+              <div v-for="obj in attributeList" :key="obj.attr_id">
+                <span>{{ obj.attr_name }}</span
+                ><br />
+                <el-checkbox
+                  v-for="(item, index) in (abc = obj.attr_vals.split(' '))"
+                  :key="index"
+                  v-model="checkboxed"
+                  :label="item"
+                  border
+                ></el-checkbox>
+              </div>
+            </el-tab-pane>
+            <el-tab-pane label="商品属性">
+              <div v-for="obj in attributeList" :key="obj.attr_id">
+                <span>{{ obj.attr_name }}</span
+                ><br />
+                <el-input v-model="obj.attr_vals"></el-input>
+              </div>
+            </el-tab-pane>
+            <el-tab-pane label="商品图片">
+              <el-upload
+                class="upload-demo"
+                action="http://liufusong.top:8899/api/private/v1/upload"
+                :headers="head"
+                :on-remove="handleRemove"
+                :on-progress="photoSuccess"
+                :file-list="fileList"
+                list-type="picture"
+              >
+                <el-button size="small" type="primary">点击上传</el-button>
+                <div slot="tip" class="el-upload__tip">
+                  只能上传jpg/png文件，且不超过500kb
+                </div>
+              </el-upload>
+            </el-tab-pane>
+            <el-tab-pane label="商品内容">
+              <div style="border: 1px solid #ccc">
+                <Toolbar
+                  style="border-bottom: 1px solid #ccc"
+                  :editor="editor"
+                  :defaultConfig="toolbarConfig"
+                  :mode="mode"
+                />
+                <Editor
+                  style="height: 300px; overflow-y: hidden"
+                  v-model="goodsData.goods_introduce"
+                  :defaultConfig="editorConfig"
+                  :mode="mode"
+                  @onCreated="onCreated"
+                />
+              </div>
+              <el-button type="primary" @click="upData">{{
+                id === "add" ? "添加商品" : "修改商品"
+              }}</el-button></el-tab-pane
+            >
+          </el-tabs>
         </div>
       </div>
     </div>
@@ -68,216 +126,48 @@
 </template>
 
 <script>
+import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
+import { getCategoriesLst, getRootCatList, addGoodsAPI, getGoodsDataById, setGoodsById } from '@/api/goods'
 export default {
-  created () { },
+  mounted () {
+  },
+  beforeDestroy () {
+    const editor = this.editor
+    if (editor == null) return
+    editor.destroy() // 组件销毁时，及时销毁编辑器
+  },
+
+  created () {
+    this.id = this.$route.params.id
+    this.getCategoriesLst()
+    if (this.id !== 'add') {
+      this.getGoodsDataById()
+    }
+  },
   data () {
     return {
+      id: '',
+      head: {
+        Authorization: this.$store.state.user.userData.token
+      },
+      editor: null,
+      toolbarConfig: {},
+      editorConfig: { placeholder: '请输入内容...' },
+      mode: 'default', // or 'simple'
       active: 0,
+      activeData: false,
       goodsData: {
       },
+      fileList: [],
+      checkboxed: [],
       value: [],
-      options: [{
-        value: 'zhinan',
-        label: '指南',
-        children: [{
-          value: 'shejiyuanze',
-          label: '设计原则',
-          children: [{
-            value: 'yizhi',
-            label: '一致'
-          }, {
-            value: 'fankui',
-            label: '反馈'
-          }, {
-            value: 'xiaolv',
-            label: '效率'
-          }, {
-            value: 'kekong',
-            label: '可控'
-          }]
-        }, {
-          value: 'daohang',
-          label: '导航',
-          children: [{
-            value: 'cexiangdaohang',
-            label: '侧向导航'
-          }, {
-            value: 'dingbudaohang',
-            label: '顶部导航'
-          }]
-        }]
-      }, {
-        value: 'zujian',
-        label: '组件',
-        children: [{
-          value: 'basic',
-          label: 'Basic',
-          children: [{
-            value: 'layout',
-            label: 'Layout 布局'
-          }, {
-            value: 'color',
-            label: 'Color 色彩'
-          }, {
-            value: 'typography',
-            label: 'Typography 字体'
-          }, {
-            value: 'icon',
-            label: 'Icon 图标'
-          }, {
-            value: 'button',
-            label: 'Button 按钮'
-          }]
-        }, {
-          value: 'form',
-          label: 'Form',
-          children: [{
-            value: 'radio',
-            label: 'Radio 单选框'
-          }, {
-            value: 'checkbox',
-            label: 'Checkbox 多选框'
-          }, {
-            value: 'input',
-            label: 'Input 输入框'
-          }, {
-            value: 'input-number',
-            label: 'InputNumber 计数器'
-          }, {
-            value: 'select',
-            label: 'Select 选择器'
-          }, {
-            value: 'cascader',
-            label: 'Cascader 级联选择器'
-          }, {
-            value: 'switch',
-            label: 'Switch 开关'
-          }, {
-            value: 'slider',
-            label: 'Slider 滑块'
-          }, {
-            value: 'time-picker',
-            label: 'TimePicker 时间选择器'
-          }, {
-            value: 'date-picker',
-            label: 'DatePicker 日期选择器'
-          }, {
-            value: 'datetime-picker',
-            label: 'DateTimePicker 日期时间选择器'
-          }, {
-            value: 'upload',
-            label: 'Upload 上传'
-          }, {
-            value: 'rate',
-            label: 'Rate 评分'
-          }, {
-            value: 'form',
-            label: 'Form 表单'
-          }]
-        }, {
-          value: 'data',
-          label: 'Data',
-          children: [{
-            value: 'table',
-            label: 'Table 表格'
-          }, {
-            value: 'tag',
-            label: 'Tag 标签'
-          }, {
-            value: 'progress',
-            label: 'Progress 进度条'
-          }, {
-            value: 'tree',
-            label: 'Tree 树形控件'
-          }, {
-            value: 'pagination',
-            label: 'Pagination 分页'
-          }, {
-            value: 'badge',
-            label: 'Badge 标记'
-          }]
-        }, {
-          value: 'notice',
-          label: 'Notice',
-          children: [{
-            value: 'alert',
-            label: 'Alert 警告'
-          }, {
-            value: 'loading',
-            label: 'Loading 加载'
-          }, {
-            value: 'message',
-            label: 'Message 消息提示'
-          }, {
-            value: 'message-box',
-            label: 'MessageBox 弹框'
-          }, {
-            value: 'notification',
-            label: 'Notification 通知'
-          }]
-        }, {
-          value: 'navigation',
-          label: 'Navigation',
-          children: [{
-            value: 'menu',
-            label: 'NavMenu 导航菜单'
-          }, {
-            value: 'tabs',
-            label: 'Tabs 标签页'
-          }, {
-            value: 'breadcrumb',
-            label: 'Breadcrumb 面包屑'
-          }, {
-            value: 'dropdown',
-            label: 'Dropdown 下拉菜单'
-          }, {
-            value: 'steps',
-            label: 'Steps 步骤条'
-          }]
-        }, {
-          value: 'others',
-          label: 'Others',
-          children: [{
-            value: 'dialog',
-            label: 'Dialog 对话框'
-          }, {
-            value: 'tooltip',
-            label: 'Tooltip 文字提示'
-          }, {
-            value: 'popover',
-            label: 'Popover 弹出框'
-          }, {
-            value: 'card',
-            label: 'Card 卡片'
-          }, {
-            value: 'carousel',
-            label: 'Carousel 走马灯'
-          }, {
-            value: 'collapse',
-            label: 'Collapse 折叠面板'
-          }]
-        }]
-      }, {
-        value: 'ziyuan',
-        label: '资源',
-        children: [{
-          value: 'axure',
-          label: 'Axure Components'
-        }, {
-          value: 'sketch',
-          label: 'Sketch Templates'
-        }, {
-          value: 'jiaohu',
-          label: '组件交互文档'
-        }]
-      }],
       rules: {
         goods_name: [
           { required: true, message: '请输入商品名称', trigger: 'blur' },
           { min: 2, max: 30, message: '长度在2-30之间', trigger: 'blur' }
         ],
         goods_price: [
-          { required: true, message: '请输入商品名称', trigger: 'blur' }
+          { required: true, message: '请输入商品价格', trigger: 'blur' }
         ],
         goods_weight: [
           { required: true, message: '请输入商品重量', trigger: 'blur' }
@@ -288,22 +178,96 @@ export default {
         goods_cat: [
           { required: true, message: '请选择商品分类', trigger: 'blur' }
         ]
-      }
+      },
+      catList: [],
+      catId: 0,
+      status: '',
+      attributeList: []
     }
   },
   methods: {
-    handleChange (value) {
-      console.log(value)
+    async getGoodsDataById () {
+      try {
+        const res = await getGoodsDataById(this.id)
+        res.goods_cat = res.goods_cat.split(',').map(str => Number(str))
+        console.log(res)
+        this.goodsData = res
+      } catch (error) {
+        this.$message.error('商品信息获取错误、请刷新页面')
+      }
     },
-    tabFn (value) {
-      console.log(value)
+    async upData () {
+      try {
+        await this.$refs.form.validate()
+        this.goodsData.goods_cat = this.goodsData.goods_cat.join()
+        if (this.id === 'add') {
+          await addGoodsAPI(this.goodsData)
+        } else {
+          await setGoodsById(this.id, this.goodsData)
+        }
+        this.$router.push('/goodslist')
+      } catch (error) {
+        this.$message.error('请先完成商品的基本信息')
+      }
+    },
+    async photoSuccess (response, file) {
+      console.log(file.raw)
+    },
+    handleRemove (file, fileList) {
+      console.log(file, fileList)
+    },
+    onCreated (editor) {
+      this.editor = Object.seal(editor) // 一定要用 Object.seal() ，否则会报错
+    },
+    async getRootCatList (sel) {
+      try {
+        if (this.goodsData.goods_cat.length < 1) {
+          this.$message.error('请先完成基本分类中的商品分类')
+        } else {
+          this.attributeList = []
+          const res = await getRootCatList(this.catId, sel)
+          console.log(res)
+          this.attributeList = res
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    async getCategoriesLst () {
+      try {
+        const res = await getCategoriesLst()
+        console.log(res)
+        this.catList = res
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    async tabFn (value) {
+      this.status = ''
+      console.log(value.index)
+      if (value.index === '1') {
+        this.getRootCatList('many')
+      } else if (value.index === '2') {
+        this.getRootCatList('only')
+      }
       this.active = Number(value.index)
+      try {
+        await this.$refs.form.validate()
+        if (value.index !== 0 && this.catId === '') {
+          this.status = 'error'
+        }
+        this.status = 'success'
+      } catch (error) {
+        // console.log(error)
+        this.status = 'error'
+      }
     }
   },
-  computed: {},
+  computed: {
+  },
   watch: {},
   filters: {},
-  components: {}
+  components: { Editor, Toolbar }
 }
 </script>
 

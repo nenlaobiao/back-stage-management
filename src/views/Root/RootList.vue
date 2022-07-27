@@ -31,7 +31,7 @@ export default {
   methods: {
     async getRootList () {
       try {
-        const res = await getRootListAPI()
+        const res = await getRootListAPI('list')
         console.log(res)
         this.rootList = res
       } catch (error) {

@@ -10,7 +10,11 @@
             @click="searchFn"
           ></el-button>
         </el-input>
-        <el-button type="primary" @click="$router.push('/addgoods')">添加商品</el-button>
+        <el-button
+          type="primary"
+          @click="$router.push('/goodslist/goods/' + 'add')"
+          >添加商品</el-button
+        >
       </div>
       <el-table border stripe :data="allGoodsList.goods">
         <el-table-column label="#" type="index" />
@@ -35,7 +39,7 @@
         <el-table-column label="操作" width="180px">
           <template v-slot="data">
             <el-button
-              @click="setGoodsFn(data.row)"
+              @click="$router.push('/goodslist/goods/' + data.row.goods_id)"
               type="primary"
               icon="el-icon-edit"
               size="mini"
@@ -43,7 +47,7 @@
             >
             <el-button
               @click="fn(data.row)"
-              type="primary"
+              type="danger"
               icon="el-icon-delete"
               size="mini"
               >删除</el-button
@@ -61,17 +65,6 @@
         @current-change="changePage"
       >
       </el-pagination>
-      <div class="dialog">
-        <el-dialog title="提示" :visible.sync="setDialog" width="30%">
-          <span>这是一段信息</span>
-          <span slot="footer" class="dialog-footer">
-            <el-button @click="setDialog = false">取 消</el-button>
-            <el-button type="primary" @click="setDialog = false"
-              >确 定</el-button
-            >
-          </span>
-        </el-dialog>
-      </div>
     </div>
   </div>
 </template>
@@ -84,7 +77,7 @@ export default {
   },
   data () {
     return {
-      setDialog: false,
+      setForm: {},
       inputValue: '',
       getGoodsData: {
         query: '',
@@ -95,9 +88,6 @@ export default {
     }
   },
   methods: {
-    setGoodsFn (data) {
-      console.log(data)
-    },
     async fn (data) {
       console.log(data)
       try {
