@@ -146,11 +146,57 @@ export const addCatValueAPI = ({ id, attr_name, attr_sel, attr_vals }) => {
  * @param {*} param0
  * @returns
  */
-export const getGoodsClassList = ({ pagenum, pagesize }) => {
+export const getGoodsClassList = ({ pagenum, pagesize }, type) => {
   return request({
     url: 'categories',
     params: {
-      pagenum, pagesize
+      type,
+      pagenum,
+      pagesize
     }
+  })
+}
+/**
+ *  添加商品分类接口
+ * @param {*} param0
+ * @returns
+ */
+// eslint-disable-next-line camelcase
+export const addGoodsClassAPI = ({ cat_pid, cat_name, cat_level }) => {
+  return request({
+    url: 'categories',
+    method: 'POST',
+    data: {
+      cat_pid, cat_name, cat_level
+    }
+  })
+}
+/**
+ *  修改商品分类接口
+ * @param {*} param0
+ * @returns
+ */
+// eslint-disable-next-line camelcase
+export const setGoodsClassAPI = ({ cat_id, cat_name }) => {
+  return request({
+    // eslint-disable-next-line camelcase
+    url: `categories/${cat_id}`,
+    method: 'PUT',
+    data: {
+      cat_name
+    }
+  })
+}
+/**
+ *  修改商品分类接口
+ * @param {*} param0
+ * @returns
+ */
+// eslint-disable-next-line camelcase
+export const delGoodsClassAPI = (cat_id) => {
+  return request({
+    // eslint-disable-next-line camelcase
+    url: `categories/${cat_id}`,
+    method: 'DELETE'
   })
 }
