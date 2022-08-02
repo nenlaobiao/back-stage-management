@@ -84,11 +84,12 @@
             </el-tab-pane>
             <el-tab-pane label="商品图片">
               <el-upload
-                class="upload-demo"
                 action="http://liufusong.top:8899/api/private/v1/upload"
-                :headers="head"
+                class="upload-demo"
                 :on-remove="handleRemove"
+                :headers="head"
                 :on-progress="photoSuccess"
+                :on-success="file"
                 :file-list="fileList"
                 list-type="picture"
               >
@@ -127,7 +128,7 @@
 
 <script>
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
-import { getCategoriesLst, getRootCatList, addGoodsAPI, getGoodsDataById, setGoodsById } from '@/api/goods'
+import { getCategoriesLst, getRootCatList, addGoodsAPI, getGoodsDataById, setGoodsById, upImgAPI } from '@/api/goods'
 export default {
   mounted () {
   },
@@ -161,6 +162,7 @@ export default {
       fileList: [],
       checkboxed: [],
       value: [],
+      imgList: [],
       rules: {
         goods_name: [
           { required: true, message: '请输入商品名称', trigger: 'blur' },
@@ -186,6 +188,20 @@ export default {
     }
   },
   methods: {
+    file (res, file, filelist) {
+      console.log(res)
+      console.log(file)
+      console.log(filelist)
+      const obj = {}
+      obj.pic = res.data.tmp_path
+      console.log(obj)
+      this.imgList.push(obj)
+    },
+    async upImg (data) {
+      console.dir(data)
+      const res = await upImgAPI(data.file)
+      console.log(res)
+    },
     async getGoodsDataById () {
       try {
         const res = await getGoodsDataById(this.id)
@@ -200,6 +216,9 @@ export default {
       try {
         await this.$refs.form.validate()
         this.goodsData.goods_cat = this.goodsData.goods_cat.join()
+        if (this.imgList.length !== 0) {
+          this.goodsData.pics = this.imgList
+        }
         if (this.id === 'add') {
           await addGoodsAPI(this.goodsData)
         } else {
